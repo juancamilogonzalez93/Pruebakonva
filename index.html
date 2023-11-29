@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Proyecto con Konva.js</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+</head>
+<body>
+
+    <div id="toolbar">
+        <!-- Botón para agregar un círculo -->
+        <button onclick="addShape('Circle')"><i class="fas fa-circle"></i></button>
+        
+        <!-- Controles de propiedades de la figura -->
+        <label>Tamaño:</label>
+        <input type="range" id="sizeInput" min="10" max="200" step="1" value="50">
+
+        <label>Color:</label>
+        <input type="color" id="colorInput" value="#0000ff">
+
+        <label>Grosor del Trazo:</label>
+        <input type="range" id="strokeWidthInput" min="1" max="20" step="1" value="2">
+
+        <label>Opacidad:</label>
+        <input type="range" id="opacityInput" min="0" max="1" step="0.01" value="1">
+
+        <!-- Botones para acciones -->
+        <button onclick="deleteSelected()"><i class="fas fa-trash"></i></button>
+        <button onclick="duplicateSelected()"><i class="fas fa-copy"></i></button>
+    </div>
+    <div id="canvas-container"></div>
+
+    <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+    <script>
+        function loadMainScript() {
+            const stage = new Konva.Stage({
+                container: 'canvas-container',
+                width: 800,
+                height: 600,
+                backgroundColor: '#ffffff'
+            });
+
+            const layer = new Konva.Layer();
+            stage.add(layer);
+
+            let selectedShape = null; // Almacena la figura seleccionada
+
+            window.addShape = function (shapeType) {
+                const size = document.getElementById('sizeInput').value;
+                const color = document.getElementById('colorInput').value;
+                const strokeWidth = document.getElementById('strokeWidthInput').value;
+                const opacity = document.getElementById('opacityInput').value;
+
+                let shape;
+
+                if (shapeType === 'Circle') {
+                    shape = new Konva.Circle({
+                        x: 100,
+                        y: 100,
+                        radius: size,
+                        fill: color,
+                        stroke: 'black',
+                        strokeWidth: strokeWidth,
+                        opacity: opacity,
+                        draggable: true,
+                    });
+                } else if (shapeType === 'Rect') {
+                    shape = new Konva.Rect({
+                        x: 100,
+                        y: 100,
+                        width: size,
+                        height: size,
+                        fill: color,
+                        stroke: 'black',
+                        strokeWidth: strokeWidth,
+                        opacity: opacity,
+                        draggable: true,
+                    });
+                }
+                // Agregar eventos para selección y acciones
+                shape.on('click', function() {
+                    selectShape(this); // Usamos 'this' para acceder a la figura
+                });
+
+                layer.add(shape);
+                layer.draw();
+            };
+
+            // Eliminar la figura seleccionada
+            window.deleteSelected = function () {
+                if (selectedShape) {
+                    selectedShape.destroy();
+                    layer.draw();
+                }
+            };
+
+            // Duplicar la figura seleccionada
+            window.duplicateSelected = function () {
+                if (selectedShape) {
+                    const duplicate = selectedShape.clone();
+                    duplicate.setAttrs({
+                        x: selectedShape.x() + 20,
+                        y: selectedShape.y() + 20,
+                        id: undefined, // Elimina el ID para evitar duplicados
+                        name: undefined, // Elimina el nombre para evitar duplicados
+                    });
+
+                    layer.add(duplicate);
+                    layer.draw();
+                }
+            };
+
+            // Función para resaltar la figura seleccionada
+            function selectShape(shape) {
+                if (selectedShape) {
+                    selectedShape.stroke('black'); // Restaurar color de trazo
+                }
+
+                selectedShape = shape;
+                shape.stroke('dashed black'); // Resaltar con línea punteada
+                layer.draw();
+            }
+        }
+
+        // Llamada a la función loadMainScript después de cargar Konva.js
+        loadMainScript();
+    </script>
+
+</body>
+</html>
